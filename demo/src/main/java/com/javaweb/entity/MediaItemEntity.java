@@ -54,7 +54,63 @@ public class MediaItemEntity {
     )
     private List<GenreEntity> genres;
 
+    @OneToOne(mappedBy = "mediaItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private MoviesEntity movie;
+
+    @OneToOne(mappedBy = "mediaItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private MusicEntity music;
+
+    @OneToOne(mappedBy = "mediaItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private BooksEntity book;
+
+    @OneToOne(mappedBy = "mediaItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private VideoGamesEntity videoGame;
+
+    @OneToOne(mappedBy = "mediaItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private TVSeriesEntity tvSeries;
+
+
     // Getter – Setter
+
+    public MoviesEntity getMovie() {
+        return movie;
+    }
+
+    public void setMovie(MoviesEntity movie) {
+        this.movie = movie;
+    }
+
+    public MusicEntity getMusic() {
+        return music;
+    }
+
+    public void setMusic(MusicEntity music) {
+        this.music = music;
+    }
+
+    public BooksEntity getBook() {
+        return book;
+    }
+
+    public void setBook(BooksEntity book) {
+        this.book = book;
+    }
+
+    public VideoGamesEntity getVideoGame() {
+        return videoGame;
+    }
+
+    public void setVideoGame(VideoGamesEntity videoGame) {
+        this.videoGame = videoGame;
+    }
+
+    public TVSeriesEntity getTvSeries() {
+        return tvSeries;
+    }
+
+    public void setTvSeries(TVSeriesEntity tvSeries) {
+        this.tvSeries = tvSeries;
+    }
 
     public Integer getMediaItemId() {
         return mediaItemId;

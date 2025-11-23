@@ -13,6 +13,7 @@ public class MusicEntity {
 
     @OneToOne
     @JoinColumn(name = "media_item_id")
+    @MapsId
     private MediaItemEntity mediaItem;
 
     @Column(name = "album")

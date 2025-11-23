@@ -2,13 +2,28 @@ package com.javaweb.model.response;
 
 import com.javaweb.model.dto.AbstractDTO;
 
+import java.util.Date;
 import java.util.List;
 
 public class MediaSearchResponse  {
+    private int MediaItemId;
     private String title;
-    private String Country;
+    private String description;
+    private String language;
+    private String contentRating;
+    private Date releaseDate;
+    private String urlItem;
+    private String country;
     private String typeName;
     private List<String> genre;
+
+    public int getMediaItemId() {
+        return MediaItemId;
+    }
+
+    public void setMediaItemId(int mediaItemId) {
+        MediaItemId = mediaItemId;
+    }
 
     public String getTitle() {
         return title;
@@ -19,11 +34,11 @@ public class MediaSearchResponse  {
     }
 
     public String getCountry() {
-        return Country;
+        return country;
     }
 
     public void setCountry(String country) {
-        Country = country;
+        this.country = country;
     }
 
     public String getTypeName() {
@@ -40,5 +55,45 @@ public class MediaSearchResponse  {
 
     public void setGenre(List<String> genre) {
         this.genre = genre;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getContentRating() {
+        return contentRating;
+    }
+
+    public void setContentRating(String contentRating) {
+        this.contentRating = contentRating;
+    }
+
+    public Date getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getUrlItem() {
+        return urlItem;
+    }
+
+    public void setUrlItem(String urlItem) {
+        this.urlItem = urlItem;
     }
 }
