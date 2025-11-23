@@ -11,6 +11,7 @@ public class MoviesEntity {
     private Integer mediaItemId;
 
     @OneToOne
+    @MapsId
     @JoinColumn(name = "media_item_id")
     private MediaItemEntity mediaItem;
 
