@@ -23,8 +23,6 @@ public class GenreEntity {
     @ManyToMany(mappedBy = "genres")
     private List<MediaItemEntity> mediaItems;
 
-    // Getter – Setter
-
     public Integer getGenreId() {
         return genreId;
     }

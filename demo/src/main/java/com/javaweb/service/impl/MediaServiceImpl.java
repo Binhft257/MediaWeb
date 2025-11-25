@@ -60,7 +60,6 @@ public class MediaServiceImpl implements MediaService {
                     dto = new MediaSearchResponse();
             }
 
-            // ===== MAP COMMON FIELDS =====
             dto.setMediaItemId(entity.getMediaItemId());
             dto.setTitle(entity.getTitle());
             dto.setDescription(entity.getDescription());
@@ -71,7 +70,6 @@ public class MediaServiceImpl implements MediaService {
             dto.setUrlItem(entity.getUrlItem());
             dto.setTypeName(type);
 
-            // ===== GENRE =====
             if (entity.getGenres() != null) {
                 List<String> genreNames = entity.getGenres()
                         .stream()
