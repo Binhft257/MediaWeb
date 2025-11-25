@@ -45,7 +45,6 @@ public class MediaItemEntity {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    // Many-to-Many
     @ManyToMany
     @JoinTable(
             name = "Media_Genre",
@@ -68,9 +67,6 @@ public class MediaItemEntity {
 
     @OneToOne(mappedBy = "mediaItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private TVSeriesEntity tvSeries;
-
-
-    // Getter – Setter
 
     public MoviesEntity getMovie() {
         return movie;

@@ -18,8 +18,6 @@ public class MediaTypeEntity {
     @Column(name = "description")
     private String description;
 
-    // Getter – Setter
-
     public Integer getMediaTypeId() {
         return mediaTypeId;
     }
