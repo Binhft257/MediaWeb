@@ -14,8 +14,8 @@ public class EmailService {
     public void sendOtp(String to, String otp) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
-        msg.setSubject("Mã OTP đặt lại mật khẩu");
-        msg.setText("Mã OTP của bạn là: " + otp + "\nOTP có hiệu lực trong 1 phút.");
+        msg.setSubject("Password reset OTP code");
+        msg.setText("Your OTP code is: " + otp + "\nThe OTP is valid for 1 minute.");
 
         mailSender.send(msg);
     }
