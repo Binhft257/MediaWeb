@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 
 public class PasswordResetRequest {
 
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email must not be empty")
+    @Email(message = "Invalid email")
     private String email;
 
     public String getEmail() { return email; }

@@ -37,7 +37,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public ApiResponse<?> requestOtp(PasswordResetRequest req) {
 
         if (!userRepo.existsByEmail(req.getEmail())) {
-            return new ApiResponse<>(false, "Email không tồn tại", null);
+            return new ApiResponse<>(false, "Email not found", null);
         }
 
         String otp = String.format("%06d", new Random().nextInt(999999));
@@ -48,7 +48,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         // Gửi mail
         emailService.sendOtp(req.getEmail(), otp);
 
-        return new ApiResponse<>(true, "OTP đã được gửi vào email", null);
+        return new ApiResponse<>(true, "The OTP has been sent to your email", null);
     }
 
     @Override
@@ -67,22 +67,22 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
 
         if (email == null) {
-            return new ApiResponse<>(false, "OTP không chính xác hoặc đã hết hạn", null);
+            return new ApiResponse<>(false, "The OTP is incorrect or has expired", null);
         }
 
         if (!req.getNewPassword().equals(req.getConfirmPassword())) {
-            return new ApiResponse<>(false, "Mật khẩu nhập lại không khớp", null);
+            return new ApiResponse<>(false, "The confirmed password does not match", null);
         }
 
         UserEntity user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+                .orElseThrow(() -> new RuntimeException("user not found"));
 
         user.setPassword(encoder.encode(req.getNewPassword()));
         userRepo.save(user);
 
         redis.delete(PREFIX + email);
 
-        return new ApiResponse<>(true, "Đặt lại mật khẩu thành công", null);
+        return new ApiResponse<>(true, "Password reset successfully", null);
     }
 
 
