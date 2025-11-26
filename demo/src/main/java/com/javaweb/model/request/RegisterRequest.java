@@ -8,22 +8,22 @@ import java.util.Date;
 
 public class RegisterRequest {
 
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email must not be empty")
+    @Email(message = "Invalid email")
     private String email;
 
-    @NotBlank(message = "Tên không được để trống")
+    @NotBlank(message = "Name must not be empty")
     private String name;
 
-    private String gender; // Không bắt buộc
+    private String gender;
     private Date userDob;
     private String avatar;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    @NotBlank(message = "Password must not be empty")
+    @Size(min = 6, message = "Password must have at least 6 characters")
     private String password;
 
-    @NotBlank(message = "Vui lòng nhập lại mật khẩu")
+    @NotBlank(message = "Please re-enter the new password")
     private String confirmPassword;
 
     public String getEmail() { return email; }

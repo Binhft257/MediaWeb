@@ -4,13 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 
 public class PasswordResetConfirmRequest {
 
-    @NotBlank(message = "OTP không được để trống")
+    @NotBlank(message = "OTP must not be empty")
     private String otp;
 
-    @NotBlank(message = "Mật khẩu mới không được để trống")
+    @NotBlank(message = "The new password must not be empty")
     private String newPassword;
 
-    @NotBlank(message = "Vui lòng xác nhận mật khẩu")
+    @NotBlank(message = "Please confirm the password")
     private String confirmPassword;
 
     public String getOtp() { return otp; }
