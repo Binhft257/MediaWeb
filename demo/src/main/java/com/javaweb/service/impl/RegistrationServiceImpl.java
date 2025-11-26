@@ -35,11 +35,11 @@ public class RegistrationServiceImpl implements RegistrationService {
     public ApiResponse<?> requestRegister(RegisterRequest req) {
 
         if (userRepo.existsByEmail(req.getEmail())) {
-            return new ApiResponse<>(false, "Email đã tồn tại", null);
+            return new ApiResponse<>(false, "Email already exists", null);
         }
 
         if (!req.getPassword().equals(req.getConfirmPassword())) {
-            return new ApiResponse<>(false, "Mật khẩu nhập lại không khớp", null);
+            return new ApiResponse<>(false, "The confirmed password does not match", null);
         }
 
         try {
@@ -53,7 +53,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                     TimeUnit.MINUTES
             );
         } catch (Exception e) {
-            return new ApiResponse<>(false, "Lỗi hệ thống khi lưu dữ liệu", null);
+            return new ApiResponse<>(false, "System error while saving data", null);
         }
 
         String otp = String.format("%06d", new Random().nextInt(999999));
@@ -63,7 +63,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         emailService.sendOtp(req.getEmail(), otp);
 
-        return new ApiResponse<>(true, "Đã gửi OTP xác minh email", null);
+        return new ApiResponse<>(true, "Verification OTP has been sent to your email", null);
     }
 
     @Override
@@ -71,12 +71,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         String email = redis.opsForValue().get(OTP_EMAIL_PREFIX + req.getOtp());
         if (email == null) {
-            return new ApiResponse<>(false, "OTP không hợp lệ hoặc đã hết hạn", null);
+            return new ApiResponse<>(false, "The OTP is invalid or has expired", null);
         }
 
         String jsonData = redis.opsForValue().get(DATA_PREFIX + email);
         if (jsonData == null) {
-            return new ApiResponse<>(false, "Thông tin đăng ký đã hết hạn, vui lòng đăng ký lại", null);
+            return new ApiResponse<>(false, "Your registration information has expired, please register again", null);
         }
 
         RegisterRequest data;
@@ -84,11 +84,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             ObjectMapper mapper = new ObjectMapper();
             data = mapper.readValue(jsonData, RegisterRequest.class);
         } catch (Exception e) {
-            return new ApiResponse<>(false, "Lỗi đọc dữ liệu đăng ký", null);
+            return new ApiResponse<>(false, "Error reading registration data", null);
         }
 
         RoleEntity role = roleRepo.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("Role USER không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Role USER not found"));
 
         UserEntity user = new UserEntity();
         user.setEmail(data.getEmail());
@@ -107,6 +107,6 @@ public class RegistrationServiceImpl implements RegistrationService {
         redis.delete(OTP_PREFIX + email);
         redis.delete(OTP_EMAIL_PREFIX + req.getOtp());
 
-        return new ApiResponse<>(true, "Đăng ký thành công", null);
+        return new ApiResponse<>(true, "success", null);
     }
 }

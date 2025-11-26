@@ -1,11 +1,11 @@
 package com.javaweb.service.impl;
 
 import com.javaweb.entity.RefreshTokenEntity;
-import com.javaweb.entity.RoleEntity;
+import com.javaweb.model.request.ChangePasswordRequest;
+import com.javaweb.model.request.UpdateProfileRequest;
 import com.javaweb.entity.UserEntity;
 import com.javaweb.model.request.LoginRequest;
 import com.javaweb.model.request.RefreshTokenRequest;
-import com.javaweb.model.request.RegisterRequest;
 import com.javaweb.model.response.LoginResponse;
 import com.javaweb.model.response.RefreshTokenResponse;
 import com.javaweb.model.response.UserResponse;
@@ -15,6 +15,7 @@ import com.javaweb.security.JwtTokenUtil;
 import com.javaweb.service.AuthService;
 import com.javaweb.service.TokenService;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -98,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void deleteUser(Integer id) {
         UserEntity user = userRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("User does not exist"));
 
         user.setStatus("inactive");
 
@@ -107,5 +111,46 @@ public class AuthServiceImpl implements AuthService {
 
         userRepo.save(user);
 
+    }
+
+    @Override
+    public UserResponse getUser(Integer id) {
+        UserEntity user = userRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserResponse userResponse = modelMapper.map(user, UserResponse.class);
+        userResponse.setRole(user.getRole().getName());
+        return userResponse;
+
+    }
+
+    @Override
+    public void updateProfile(Integer id, UpdateProfileRequest request) {
+        UserEntity user = userRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        modelMapper.map(request, user); // Update từng field (null không ghi đè)
+
+        userRepo.save(user);
+    }
+
+    @Override
+    public void changePassword(Integer id, ChangePasswordRequest request) {
+        UserEntity user = userRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("The old password is incorrect");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new RuntimeException("The new password must not be the same as the old password");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("The re-entered new password does not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepo.save(user);
     }
 }

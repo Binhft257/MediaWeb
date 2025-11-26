@@ -10,4 +10,5 @@ import java.util.List;
 
 public interface MediaService {
     Page<MediaSearchResponse> getMedias(Pageable pageable, MediaSearchRequest mediaSearchRequest);
+    MediaSearchResponse getMediasDetail(Integer id);
 }

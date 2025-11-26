@@ -1,15 +1,18 @@
 package com.javaweb.controllers;
 
+import com.javaweb.model.request.UpdateProfileRequest;
 import com.javaweb.model.request.*;
 import com.javaweb.model.response.ApiResponse;
 import com.javaweb.model.response.LoginResponse;
 import com.javaweb.model.response.RefreshTokenResponse;
 import com.javaweb.model.response.UserResponse;
+import com.javaweb.security.SecurityUtils;
 import com.javaweb.service.AuthService;
 import com.javaweb.service.PasswordResetService;
 import com.javaweb.service.RegistrationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -53,12 +56,13 @@ public class AuthController {
         return service.confirmRegister(req);
     }
 
-    @DeleteMapping("/delete-account/{id}")
-    public ApiResponse<?> delete(@PathVariable Integer id) {
+    @DeleteMapping("/delete-account")
+    public ApiResponse<?> deleteMyAccount() {
+        Integer id = SecurityUtils.getPrincipal().getId();
         authService.deleteUser(id);
         return new ApiResponse<>(true, "Xóa tài khoản thành công", null);
-
     }
+
     @PostMapping("/password-reset/request")
     public ApiResponse<?> requestOtp(@Valid @RequestBody PasswordResetRequest req) {
         return passwordResetService.requestOtp(req);
@@ -68,4 +72,32 @@ public class AuthController {
     public ApiResponse<?> confirmOtp(@Valid @RequestBody PasswordResetConfirmRequest req) {
         return passwordResetService.confirmOtp(req);
     }
+
+    @GetMapping("/profile")
+    public ApiResponse<?> getProfile() {
+        Integer userId = SecurityUtils.getPrincipal().getId();
+        UserResponse user = authService.getUser(userId);
+
+        return new ApiResponse<>(true, "success", user);
+    }
+
+    @PatchMapping("/profile")
+    public ApiResponse<?> updateProfile(@RequestBody UpdateProfileRequest req) {
+
+        Integer id = SecurityUtils.getPrincipal().getId();
+        authService.updateProfile(id,req);
+
+        return new ApiResponse<>(true, "success", null);
+    }
+    @PatchMapping("/change-password")
+    public ApiResponse<?> changePassword(@RequestBody ChangePasswordRequest req) {
+
+        Integer id = SecurityUtils.getPrincipal().getId();
+        authService.changePassword(id, req);
+
+        return new ApiResponse<>(true, "success", null);
+    }
+
+
+
 }
