@@ -9,7 +9,6 @@ import com.javaweb.model.request.RefreshTokenRequest;
 import com.javaweb.model.response.LoginResponse;
 import com.javaweb.model.response.RefreshTokenResponse;
 import com.javaweb.model.response.UserResponse;
-import com.javaweb.repository.RoleRepository;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.security.JwtTokenUtil;
 import com.javaweb.service.AuthService;
@@ -36,9 +35,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private RoleRepository roleRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
