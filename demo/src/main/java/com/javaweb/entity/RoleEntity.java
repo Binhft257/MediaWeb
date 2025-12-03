@@ -10,7 +10,7 @@ public class RoleEntity {
     @Column(name = "role_id")
     private Integer id;
 
-    @Column(name = "role_name", nullable = false)
+    @Column(name = "role_name", nullable = false, unique = true)
     private String name;
 
     public Integer getId() { return id; }

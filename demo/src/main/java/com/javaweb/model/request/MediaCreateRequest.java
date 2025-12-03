@@ -1,10 +1,8 @@
-package com.javaweb.model.response;
-
+package com.javaweb.model.request;
 import java.util.Date;
 import java.util.List;
 
-public class MediaSearchResponse  {
-    private int MediaItemId;
+public abstract class MediaCreateRequest {
     private String typeName;
     private String title;
     private String description;
@@ -18,47 +16,26 @@ public class MediaSearchResponse  {
     // Either a BooksRequest, a MoviesRequest, a MusicRequest, a TVSeriesRequest or a VideoGamesRequest
     private Object details;
 
-    public int getMediaItemId() {
-        return MediaItemId;
-    }
-
-    public void setMediaItemId(int mediaItemId) {
-        MediaItemId = mediaItemId;
-    }
-
-    public String getTitle() {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Media item must have a title.");
-        }
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public String getTypeName() {
         return typeName;
     }
 
     public void setTypeName(String typeName) {
+        if (typeName != "Book" && typeName != "Music" && typeName != "Movie" && typeName != "TV Series" && typeName != "Video Game") {
+            throw new IllegalArgumentException("Media item must be of type Book, Music, Movie, TV Series or Video Game.");
+        }
         this.typeName = typeName;
     }
 
-    public List<String> getGenre() {
-        return genres;
+    public String getTitle() {
+        return title;
     }
 
-    public void setGenre(List<String> genres) {
-        this.genres = genres;
+    public void setTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Media item must have a title.");
+        }
+        this.title = title;
     }
 
     public String getDescription() {
@@ -68,13 +45,21 @@ public class MediaSearchResponse  {
     public void setDescription(String description) {
         this.description = description;
     }
-
+    
     public String getLanguage() {
         return language;
     }
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public String getContentRating() {
@@ -100,15 +85,22 @@ public class MediaSearchResponse  {
     public void setUrlItem(String urlItem) {
         this.urlItem = urlItem;
     }
-    
+
+    public List<String> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<String> genres) {
+        this.genres = genres;
+    }
+
     public Object getDetails() {
         return details;
     }
 
     public void setDetails(Object details) {
-        if (!(details instanceof BooksResponse) && !(details instanceof MoviesResponse) && !(details instanceof MusicResponse) && !(details instanceof TVSeriesResponse) && !(details instanceof VideoGamesResponse)) {
-            throw new IllegalArgumentException("Details must be a Books, Movies, Music, TVServies or a Video Games response.");
+        if (!(details instanceof BooksRequest) && !(details instanceof MoviesRequest) && !(details instanceof MusicRequest) && !(details instanceof TVSeriesRequest) && !(details instanceof VideoGamesRequest)) {
+            throw new IllegalArgumentException("Details must be a Books, Movies, Music, TVServies or a Video Games request.");
         }
-        this.details = details;
     }
 }

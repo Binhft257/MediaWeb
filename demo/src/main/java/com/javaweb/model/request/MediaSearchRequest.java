@@ -1,12 +1,12 @@
 package com.javaweb.model.request;
 
-import com.javaweb.model.dto.AbstractDTO;
+import com.javaweb.model.dto.AbstractMediaSearchDTO;
 
-public class MediaSearchRequest extends AbstractDTO {
+public class MediaSearchRequest extends AbstractMediaSearchDTO<Object> {
     private String title;
     private String country;
     private String typeName;
-    private String genre;
+    private String genre;   
 
     public String getTitle() {
         return title;
