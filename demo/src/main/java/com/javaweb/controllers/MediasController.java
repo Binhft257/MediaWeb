@@ -60,4 +60,5 @@ public class MediasController {
         MediaSearchResponse updatedMedia = mediaService.updateMediaItem(id, request, userId);
         return ResponseEntity.ok(updatedMedia);
     }
+
 }
