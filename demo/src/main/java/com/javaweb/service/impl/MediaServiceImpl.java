@@ -245,7 +245,6 @@ public class MediaServiceImpl implements MediaService {
         // Delete the review
         userCommentRepository.delete(entity);
     }
-
     
     @Override
     public List<UserRatingResponse> getMediaRatings(Integer mediaItemId) {
