@@ -1,4 +1,4 @@
-package com.javaweb.api;
+package com.javaweb.controllers;
 
 import com.javaweb.model.request.MediaCreateRequest;
 import com.javaweb.model.request.MediaSearchRequest;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/medias")
-public class MediaAPI {
+public class MediasController {
 
     @Autowired
     private MediaService mediaService;
