@@ -2,7 +2,6 @@ package com.javaweb.entity;
 
 import jakarta.persistence.*;
 
-import java.util.List;
 @Entity
 @Table(name = "Media_Type")
 public class MediaTypeEntity {
