@@ -5,15 +5,20 @@ import java.util.Date;
 public class UpdateProfileRequest {
 
     private String name;
-    private String gender;
+    private String userGender;
     private Date userDob;
     private String avatar;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
+    public String getUserGender() {
+        return userGender;
+    }
+
+    public void setUserGender(String userGender) {
+        this.userGender = userGender;
+    }
 
     public Date getUserDob() { return userDob; }
     public void setUserDob(Date userDob) { this.userDob = userDob; }
