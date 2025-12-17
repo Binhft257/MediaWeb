@@ -5,7 +5,7 @@ import java.util.Date;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "User_Comment_Entity")
+@Table(name = "User_Comment")
 public class UserCommentEntity {
 
     @Id

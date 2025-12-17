@@ -2,7 +2,22 @@ package com.javaweb.model.request;
 import java.util.Date;
 import java.util.List;
 
-public abstract class MediaCreateRequest {
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    property = "typeName",
+    visible = true
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = MoviesRequest.class, name = "Movie"),
+    @JsonSubTypes.Type(value = BooksRequest.class, name = "Book"),
+    @JsonSubTypes.Type(value = MusicRequest.class, name = "Music"),
+    @JsonSubTypes.Type(value = TVSeriesRequest.class, name = "TV Series"),
+    @JsonSubTypes.Type(value = VideoGamesRequest.class, name = "Video Game")
+})
+public class MediaCreateRequest {
     private String typeName;
     private String title;
     private String description;
@@ -13,16 +28,15 @@ public abstract class MediaCreateRequest {
     private String urlItem;
     private List<String> genres;
 
-    // Either a BooksRequest, a MoviesRequest, a MusicRequest, a TVSeriesRequest or a VideoGamesRequest
-    private Object details;
-
     public String getTypeName() {
         return typeName;
     }
 
     public void setTypeName(String typeName) {
-        if (typeName != "Book" && typeName != "Music" && typeName != "Movie" && typeName != "TV Series" && typeName != "Video Game") {
-            throw new IllegalArgumentException("Media item must be of type Book, Music, Movie, TV Series or Video Game.");
+        if (!List.of("Book", "Music", "Movie", "TV Series", "Video Game").contains(typeName)) {
+            throw new IllegalArgumentException(
+                "Media item must be of type Book, Music, Movie, TV Series or Video Game."
+            );
         }
         this.typeName = typeName;
     }
@@ -92,15 +106,5 @@ public abstract class MediaCreateRequest {
 
     public void setGenres(List<String> genres) {
         this.genres = genres;
-    }
-
-    public Object getDetails() {
-        return details;
-    }
-
-    public void setDetails(Object details) {
-        if (!(details instanceof BooksRequest) && !(details instanceof MoviesRequest) && !(details instanceof MusicRequest) && !(details instanceof TVSeriesRequest) && !(details instanceof VideoGamesRequest)) {
-            throw new IllegalArgumentException("Details must be a Books, Movies, Music, TVServies or a Video Games request.");
-        }
     }
 }

@@ -20,6 +20,9 @@ public class MediaItemEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "uploaded_by", nullable = false)
+    private Integer uploadedBy;
+
     @Column(name = "description")
     private String description;
 
@@ -44,7 +47,7 @@ public class MediaItemEntity {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "Media_Genre",
             joinColumns = @JoinColumn(name = "media_item_id"),
@@ -193,6 +196,14 @@ public class MediaItemEntity {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getUploadedBy() {
+        return uploadedBy;
+    }
+    
+    public void setUploadedBy(Integer uploadedBy) {
+        this.uploadedBy = uploadedBy;
     }
 
     public List<GenreEntity> getGenres() {

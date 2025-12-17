@@ -5,7 +5,7 @@ public class TVSeriesRequest extends MediaCreateRequest{
     private int totalSeasons;
     private int totalEpisodes;
     private String productionCompany;
-
+    
     public String getCreator() {
         return creator;
     }

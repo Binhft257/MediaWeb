@@ -1,6 +1,6 @@
 package com.javaweb.model.request;
 
-public abstract class TrackMediaRequest {
+public class TrackMediaRequest {
     private Integer mediaItemId;
 
     public Integer getMediaItemId() {

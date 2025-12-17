@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "Media_Genre")
+@Table(name = "genre")
 public class GenreEntity {
 
     @Id
@@ -19,7 +19,6 @@ public class GenreEntity {
     @Column(name = "description")
     private String description;
 
-    // Many-to-Many with MediaItem
     @ManyToMany(mappedBy = "genres")
     private List<MediaItemEntity> mediaItems;
 

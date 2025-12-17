@@ -41,9 +41,7 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public List<MediaSearchResponse> getTrackedMediaItems(Integer userId) {
         // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to rate.");
-        }
+        userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to see your tracking space."));
 
         // Get the logs of the connected user
         List<UserMediaLogEntity> userMediaLogEntities = userMediaLogRepository.findByUserId(userId);
@@ -66,9 +64,7 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public MediaSearchResponse trackMediaItem(TrackMediaRequest request, Integer userId) {
         // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to track a media item.");
-        }
+        userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to track a media item."));
 
         // Get the media item
         MediaItemEntity mediaItemEntity = mediaItemRepository.findById(request.getMediaItemId()).orElseThrow(() -> new RuntimeException("Media item not found."));
@@ -89,9 +85,7 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public void deleteMediaItemTracked(Integer userMediaLogId, Integer userId) {
         // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to delete a media item tracked.");
-        }
+        userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to delete a media track."));
 
         // Get the user media log
         UserMediaLogEntity userMediaLogEntity = userMediaLogRepository.findById(userMediaLogId).orElseThrow(() -> new RuntimeException("User media log not found."));
@@ -110,34 +104,47 @@ public class TrackingServiceImpl implements TrackingService {
     
     // Map a media item entity into a media search response
     private MediaSearchResponse mapToSearchResponse(MediaItemEntity entity) {
+        String type = entity.getMediaType().getTypeName();
 
-        MediaSearchResponse dto = new MediaSearchResponse();
+        MediaSearchResponse dto;
 
-        // Map common attributes
-        modelMapper.map(entity, dto);
-
-        // Map genres
-        if (entity.getGenres() != null) {
-            List<String> genreNames = entity.getGenres()
-                    .stream()
-                    .map(GenreEntity::getGenreName)
-                    .toList();
-            dto.setGenre(genreNames);
+        switch (type) {
+            case "Movie":
+                dto = modelMapper.map(entity.getMovie(), MoviesResponse.class);
+                break;
+            case "Music":
+                dto = modelMapper.map(entity.getMusic(), MusicResponse.class);
+                break;
+            case "Book":
+                dto = modelMapper.map(entity.getBook(), BooksResponse.class);
+                break;
+            case "TV Series":
+                dto = modelMapper.map(entity.getTvSeries(), TVSeriesResponse.class);
+                break;
+            case "Video Game":
+                dto = modelMapper.map(entity.getVideoGame(), VideoGamesResponse.class);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown media type: " + type);
         }
 
-        // Map specific details
-        String type = entity.getMediaType().getTypeName();
+        // Champs communs
+        dto.setMediaItemId(entity.getMediaItemId());
+        dto.setTitle(entity.getTitle());
+        dto.setDescription(entity.getDescription());
+        dto.setLanguage(entity.getLanguage());
+        dto.setCountry(entity.getCountry());
+        dto.setContentRating(entity.getContentRating());
+        dto.setReleaseDate(entity.getReleaseDate());
+        dto.setUrlItem(entity.getUrlItem());
         dto.setTypeName(type);
 
-        Object details = switch (type) {
-            case "Movie" -> modelMapper.map(entity.getMovie(), MoviesResponse.class);
-            case "Music" -> modelMapper.map(entity.getMusic(), MusicResponse.class);
-            case "Book" -> modelMapper.map(entity.getBook(), BooksResponse.class);
-            case "TV Series" -> modelMapper.map(entity.getTvSeries(), TVSeriesResponse.class);
-            case "Video Game" -> modelMapper.map(entity.getVideoGame(), VideoGamesResponse.class);
-            default -> null;
-        };
-        dto.setDetails(details);
+        if (entity.getGenres() != null) {
+            List<String> genreNames = entity.getGenres().stream()
+                    .map(GenreEntity::getGenreName)
+                    .toList();
+            dto.setGenres(genreNames);
+        }
 
         return dto;
     }

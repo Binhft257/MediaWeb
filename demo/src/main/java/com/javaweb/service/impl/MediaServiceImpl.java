@@ -36,7 +36,6 @@ import com.javaweb.repository.UserCommentRepository;
 import com.javaweb.repository.UserRatingRepository;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.service.MediaService;
-import com.javaweb.exceptions.BadRequestException;
 import com.javaweb.exceptions.UnauthorizedException;
 
 import org.modelmapper.ModelMapper;
@@ -105,14 +104,14 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public MediaSearchResponse uploadMediaItem(MediaCreateRequest mediaCreateRequest, Integer userId) {
         // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to upload a media item.");
-        }
+        userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to upload a media item."));
 
         // Create entity
         MediaItemEntity entity = new MediaItemEntity();
         mapMediaItemToEntity(mediaCreateRequest, entity);   
-        entity.setCreatedAt(new Date());    
+        entity.setCreatedAt(new Date());
+        entity.setUpdatedAt(new Date());
+        entity.setUploadedBy(userId);
 
         // Save the media entity in the db
         mediaItemRepository.save(entity);
@@ -124,9 +123,8 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public void deleteMediaItem(Integer mediaItemId, Integer userId) {
         // Verify the user is an admin
-        UserEntity userEntity = userRepository.findById(userId)
-            .orElseThrow(() -> new UnauthorizedException("You must be authenticated to delete a media item."));
-
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to delete a media item."));
+        
         if (userEntity.getRole().getName() != "Admin") {
             new UnauthorizedException("You must be an admin to delete a media item.");
         }
@@ -141,8 +139,7 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public MediaSearchResponse updateMediaItem(Integer mediaItemId, MediaCreateRequest mediaCreateRequest, Integer userId) {
         // Verify the user is an admin
-        UserEntity userEntity = userRepository.findById(userId)
-            .orElseThrow(() -> new UnauthorizedException("You must be authenticated to delete a media item."));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to update a media item."));
 
         if (userEntity.getRole().getName() != "Admin") {
             new UnauthorizedException("You must be an admin to delete a media item.");
@@ -165,7 +162,7 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public List<UserCommentResponse> getMediaReviews(Integer mediaItemId) {
-        List<UserCommentEntity> reviewsEntities = userCommentRepository.findByMediaItemId(mediaItemId);
+        List<UserCommentEntity> reviewsEntities = userCommentRepository.findByMediaItem_MediaItemId(mediaItemId);
 
         // Map to response
         List<UserCommentResponse> reviewsResponses =
@@ -178,21 +175,26 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public UserCommentResponse createMediaReview(Integer mediaItemId, UserCommentRequest request, Integer userId) {
-        // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to create a review.");
+        // Check if the user is connected
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to create a review."));
+
+        // Verify that the media item exists
+        MediaItemEntity mediaItem = mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found"));
+
+        // Check if the user has already commented on this media item
+        boolean alreadyCommented = userCommentRepository.existsByUserAndMediaItem(user, mediaItem);
+        if (alreadyCommented) {
+            throw new IllegalStateException("User has already commented on this media item.");
         }
 
-        // Create entity
+        // Create the comment entity
         UserCommentEntity entity = new UserCommentEntity();
-        
-        // Map request to entity
         entity.setStatus(request.getStatus());
         entity.setCreatedAt(new Date());
-        entity.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
-        entity.setMediaItem(mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found")));
+        entity.setUser(user);
+        entity.setMediaItem(mediaItem);
 
-        // Save the user comment entity in the db
+        // Save the comment in the database
         userCommentRepository.save(entity);
 
         // Return the response
@@ -200,42 +202,38 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public UserCommentResponse updateMediaReview(Integer mediaItemId, Integer reviewId, UserCommentRequest request, Integer userId) {
-        // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to update a review.");
-        }
+    public UserCommentResponse updateMediaReview(Integer mediaItemId, UserCommentRequest request, Integer userId) {
+        // Check the user is connected
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to update a review."));
 
-        // Get the review entity
-        UserCommentEntity entity = userCommentRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found."));
+        // Verify that the media item exists
+        MediaItemEntity mediaItem = mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found"));
 
-        // Check if the user is the one that wrote the review
-        if (userId != entity.getUser().getId()) {
-            throw new UnauthorizedException("You can't modify a review you didn't wrote.");
-        }
+        // Find the review by user and media item
+        UserCommentEntity entity = userCommentRepository.findByUserAndMediaItem(user, mediaItem).orElseThrow(() -> new RuntimeException("Review not found."));
 
-        // Update entity
+        // Update the review
         entity.setStatus(request.getStatus());
         entity.setUpdatedAt(new Date());
-    
-        // Save the media entity in the db
+
+        // Save the updated review in the database
         userCommentRepository.save(entity);
 
         // Return the response
-        return mapToUserCommentResponse(entity);        
+        return mapToUserCommentResponse(entity);
     }
 
-    @Override
-    public void deleteMediaReview(Integer reviewId, Integer userId) {
-        // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to delete a review.");
-        }
 
-        // Get the review entity
-        UserCommentEntity entity = userCommentRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found."));
+    @Override
+    public void deleteMediaReview(Integer mediaItemId, Integer userId) {
+        // Check if a user is connected
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to delete a review."));
+
+        // Verify that the media item exists
+        MediaItemEntity mediaItem = mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found"));
+
+        // Find the review by user and media item
+        UserCommentEntity entity = userCommentRepository.findByUserAndMediaItem(user, mediaItem).orElseThrow(() -> new RuntimeException("Review not found."));
 
         // Check if the user is the one that wrote the review
         if (userId != entity.getUser().getId()) {
@@ -248,7 +246,7 @@ public class MediaServiceImpl implements MediaService {
     
     @Override
     public List<UserRatingResponse> getMediaRatings(Integer mediaItemId) {
-        List<UserRatingEntity> ratingsEntities = userRatingRepository.findByMediaItemId(mediaItemId);
+        List<UserRatingEntity> ratingsEntities = userRatingRepository.findByMediaItem_MediaItemId(mediaItemId);
 
         // Map to response
         List<UserRatingResponse> ratingsResponses =
@@ -262,62 +260,62 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public UserRatingResponse createMediaRating(Integer mediaItemId, UserRatingRequest request, Integer userId) {
         // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to rate.");
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to rate."));
+
+        // Find media item
+        MediaItemEntity mediaItem = mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found"));
+
+        // Check if user has already rated
+        boolean alreadyRated = userRatingRepository.existsByUserAndMediaItem(user, mediaItem);
+        if (alreadyRated) {
+            throw new IllegalStateException("User has already rated this media item.");
         }
 
         // Create entity
         UserRatingEntity entity = new UserRatingEntity();
-        
-        // Map request to entity
         entity.setRatingValue(request.getRatingValue());
         entity.setRatedAt(new Date());
-        entity.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
-        entity.setMediaItem(mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found")));
+        entity.setUser(user);
+        entity.setMediaItem(mediaItem);
 
-        // Save the user comment entity in the db
+        // Save in the db
         userRatingRepository.save(entity);
 
-        // Return the response
         return mapToUserRatingResponse(entity);
     }
 
     @Override
-    public UserRatingResponse updateMediaRating(Integer mediaItemId, Integer reviewId, UserRatingRequest request, Integer userId) {
-        // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to update a rating.");
-        }
+    public UserRatingResponse updateMediaRating(Integer mediaItemId, UserRatingRequest request, Integer userId) {
+        // Check if the user is connected
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to update a rating."));
 
-        // Get the rating entity
-        UserRatingEntity entity = userRatingRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Rating not found."));
+        // Verify that the media item exists
+        MediaItemEntity mediaItem = mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found"));
 
-        // Check if the user is the one that wrote the review
-        if (userId != entity.getUser().getId()) {
-            throw new UnauthorizedException("You can't modify a rating you don't own.");
-        }
+        // Find the rating by user and media item
+        UserRatingEntity entity = userRatingRepository.findByUserAndMediaItem(user, mediaItem).orElseThrow(() -> new RuntimeException("Rating not found."));
 
-        // Update entity
+        // Update the rating
         entity.setRatingValue(request.getRatingValue());
-    
-        // Save the media entity in the db
+        entity.setRatedAt(new Date());
+
+        // Save the updated rating in the database
         userRatingRepository.save(entity);
 
         // Return the response
-        return mapToUserRatingResponse(entity);        
+        return mapToUserRatingResponse(entity);      
     }
 
     @Override
-    public void deleteMediaRating(Integer ratingId, Integer userId) {
-        // Check if a user is connected
-        if (userId == null) {
-            throw new UnauthorizedException("You must be authenticated to delete a rating.");
-        }
+    public void deleteMediaRating(Integer mediaItemId, Integer userId) {
+        // Check if the user is connected
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to delete a rating."));
 
-        // Get the rating entity
-        UserRatingEntity entity = userRatingRepository.findById(ratingId)
-                .orElseThrow(() -> new RuntimeException("Rating not found."));
+        // Verify that the media item exists
+        MediaItemEntity mediaItem = mediaItemRepository.findById(mediaItemId).orElseThrow(() -> new RuntimeException("Media Item not found"));
+
+        // Find the rating by user and media item
+        UserRatingEntity entity = userRatingRepository.findByUserAndMediaItem(user, mediaItem).orElseThrow(() -> new RuntimeException("Rating not found."));
 
         // Check if the user is the one that wrote the review
         if (userId != entity.getUser().getId()) {
@@ -332,106 +330,122 @@ public class MediaServiceImpl implements MediaService {
 
     // Map a media item entity into a media search response
     private MediaSearchResponse mapToSearchResponse(MediaItemEntity entity) {
+        String type = entity.getMediaType().getTypeName();
 
-        MediaSearchResponse dto = new MediaSearchResponse();
+        MediaSearchResponse dto;
 
-        // Map common attributes
-        modelMapper.map(entity, dto);
-
-        // Map genres
-        if (entity.getGenres() != null) {
-            List<String> genreNames = entity.getGenres()
-                    .stream()
-                    .map(GenreEntity::getGenreName)
-                    .toList();
-            dto.setGenre(genreNames);
+        switch (type) {
+            case "Movie":
+                dto = modelMapper.map(entity.getMovie(), MoviesResponse.class);
+                break;
+            case "Music":
+                dto = modelMapper.map(entity.getMusic(), MusicResponse.class);
+                break;
+            case "Book":
+                dto = modelMapper.map(entity.getBook(), BooksResponse.class);
+                break;
+            case "TV Series":
+                dto = modelMapper.map(entity.getTvSeries(), TVSeriesResponse.class);
+                break;
+            case "Video Game":
+                dto = modelMapper.map(entity.getVideoGame(), VideoGamesResponse.class);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown media type: " + type);
         }
 
-        // Map specific details
-        String type = entity.getMediaType().getTypeName();
+        // Champs communs
+        dto.setMediaItemId(entity.getMediaItemId());
+        dto.setTitle(entity.getTitle());
+        dto.setDescription(entity.getDescription());
+        dto.setLanguage(entity.getLanguage());
+        dto.setCountry(entity.getCountry());
+        dto.setContentRating(entity.getContentRating());
+        dto.setReleaseDate(entity.getReleaseDate());
+        dto.setUrlItem(entity.getUrlItem());
         dto.setTypeName(type);
 
-        Object details = switch (type) {
-            case "Movie" -> modelMapper.map(entity.getMovie(), MoviesResponse.class);
-            case "Music" -> modelMapper.map(entity.getMusic(), MusicResponse.class);
-            case "Book" -> modelMapper.map(entity.getBook(), BooksResponse.class);
-            case "TV Series" -> modelMapper.map(entity.getTvSeries(), TVSeriesResponse.class);
-            case "Video Game" -> modelMapper.map(entity.getVideoGame(), VideoGamesResponse.class);
-            default -> null;
-        };
-        dto.setDetails(details);
+        if (entity.getGenres() != null) {
+            List<String> genreNames = entity.getGenres().stream()
+                    .map(GenreEntity::getGenreName)
+                    .toList();
+            dto.setGenres(genreNames);
+        }
 
         return dto;
     }
-
-    // Edit a media item entity according to a media edit request
+    
+    // Map a media item to entity
     private void mapMediaItemToEntity(MediaCreateRequest request, MediaItemEntity entity) {
-        // Find media type entity
-        String typeName = request.getTypeName();
-        MediaTypeEntity mediaTypeEntity = mediaTypeRepository.findByTypeName(typeName)
-            .orElseThrow(() -> new IllegalArgumentException("Media type not found: " + typeName));
 
-        // Find genre
-        List<String> genres = request.getGenres();
-        List<GenreEntity> genreEntities = genreRepository.findAllByGenreName(genres)
-            .orElseThrow(() -> new IllegalArgumentException("One of several genres not found in: " + genres));
+        entity.setTitle(request.getTitle());
+        entity.setDescription(request.getDescription());
+        entity.setLanguage(request.getLanguage());
+        entity.setCountry(request.getCountry());
+        entity.setContentRating(request.getContentRating());
+        entity.setReleaseDate(request.getReleaseDate());
+        entity.setUrlItem(request.getUrlItem());
 
-        // Map entity attributes except details
-        modelMapper.map(request, entity);
-        entity.setMediaType(mediaTypeEntity);
-        entity.setGenres(genreEntities);
+        MediaTypeEntity mediaType = mediaTypeRepository
+                .findByTypeName(request.getTypeName())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Media type not found: " + request.getTypeName()
+                ));
+        entity.setMediaType(mediaType);
 
-        // Find and map details
-        Object details = request.getDetails();
+        if (request.getGenres() != null) {
+            entity.setGenres(
+                genreRepository.findByGenreNameIn(request.getGenres())
+            );
+        }
 
-        switch (typeName) {
-
-            case "Book" -> {
-                if (!(details instanceof BooksRequest dto)) {
-                    throw new BadRequestException("Book details must be provided.");
-                }
-                BooksEntity book = modelMapper.map(dto, BooksEntity.class);
-                book.setMediaItem(entity);
-                entity.setBook(book);
-            }
-
-            case "Movie" -> {
-                if (!(details instanceof MoviesRequest dto)) {
-                    throw new BadRequestException("Movie details must be provided.");
-                }
-                MoviesEntity movie = modelMapper.map(dto, MoviesEntity.class);
+        if (request instanceof MoviesRequest movieReq) {
+            MoviesEntity movie = entity.getMovie();
+            if (movie == null) {
+                movie = new MoviesEntity();
                 movie.setMediaItem(entity);
                 entity.setMovie(movie);
             }
+            modelMapper.map(movieReq, movie);
 
-            case "Music" -> {
-                if (!(details instanceof MusicRequest dto)) {
-                    throw new BadRequestException("Music details must be provided.");
-                }
-                MusicEntity music = modelMapper.map(dto, MusicEntity.class);
+        } else if (request instanceof BooksRequest bookReq) {
+            BooksEntity book = entity.getBook();
+            if (book == null) {
+                book = new BooksEntity();
+                book.setMediaItem(entity);
+                entity.setBook(book);
+            }
+            modelMapper.map(bookReq, book);
+
+        } else if (request instanceof MusicRequest musicReq) {
+            MusicEntity music = entity.getMusic();
+            if (music == null) {
+                music = new MusicEntity();
                 music.setMediaItem(entity);
                 entity.setMusic(music);
             }
+            modelMapper.map(musicReq, music);
 
-            case "Video Game" -> {
-                if (!(details instanceof VideoGamesRequest dto)) {
-                    throw new BadRequestException("Video game details must be provided.");
-                }
-                VideoGamesEntity game = modelMapper.map(dto, VideoGamesEntity.class);
+        } else if (request instanceof TVSeriesRequest tvReq) {
+            TVSeriesEntity tv = entity.getTvSeries();
+            if (tv == null) {
+                tv = new TVSeriesEntity();
+                tv.setMediaItem(entity);
+                entity.setTvSeries(tv);
+            }
+            modelMapper.map(tvReq, tv);
+
+        } else if (request instanceof VideoGamesRequest gameReq) {
+            VideoGamesEntity game = entity.getVideoGame();
+            if (game == null) {
+                game = new VideoGamesEntity();
                 game.setMediaItem(entity);
                 entity.setVideoGame(game);
             }
+            modelMapper.map(gameReq, game);
 
-            case "TV Series" -> {
-                if (!(details instanceof TVSeriesRequest dto)) {
-                    throw new BadRequestException("TV series details must be provided.");
-                }
-                TVSeriesEntity serie = modelMapper.map(dto, TVSeriesEntity.class);
-                serie.setMediaItem(entity);
-                entity.setTvSeries(serie);
-            }
-
-            default -> throw new IllegalArgumentException("Unknown media type: " + typeName);
+        } else {
+            throw new IllegalArgumentException("Unsupported media create request");
         }
     }
 

@@ -15,9 +15,6 @@ public class MediaSearchResponse  {
     private String urlItem;
     private List<String> genres;
 
-    // Either a BooksRequest, a MoviesRequest, a MusicRequest, a TVSeriesRequest or a VideoGamesRequest
-    private Object details;
-
     public int getMediaItemId() {
         return MediaItemId;
     }
@@ -27,9 +24,6 @@ public class MediaSearchResponse  {
     }
 
     public String getTitle() {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Media item must have a title.");
-        }
         return title;
     }
 
@@ -53,11 +47,11 @@ public class MediaSearchResponse  {
         this.typeName = typeName;
     }
 
-    public List<String> getGenre() {
+    public List<String> getGenres() {
         return genres;
     }
 
-    public void setGenre(List<String> genres) {
+    public void setGenres(List<String> genres) {
         this.genres = genres;
     }
 
@@ -99,16 +93,5 @@ public class MediaSearchResponse  {
 
     public void setUrlItem(String urlItem) {
         this.urlItem = urlItem;
-    }
-    
-    public Object getDetails() {
-        return details;
-    }
-
-    public void setDetails(Object details) {
-        if (!(details instanceof BooksResponse) && !(details instanceof MoviesResponse) && !(details instanceof MusicResponse) && !(details instanceof TVSeriesResponse) && !(details instanceof VideoGamesResponse)) {
-            throw new IllegalArgumentException("Details must be a Books, Movies, Music, TVServies or a Video Games response.");
-        }
-        this.details = details;
     }
 }

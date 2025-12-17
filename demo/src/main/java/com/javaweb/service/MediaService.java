@@ -21,10 +21,10 @@ public interface MediaService {
     MediaSearchResponse updateMediaItem(Integer mediaItemId, MediaCreateRequest mediaCreateRequest, Integer userId);
     List<UserCommentResponse> getMediaReviews(Integer mediaItemId);
     UserCommentResponse createMediaReview(Integer mediaItemId, UserCommentRequest request, Integer userId);
-    UserCommentResponse updateMediaReview(Integer mediaItemId, Integer reviewId, UserCommentRequest request, Integer userId);
-    void deleteMediaReview(Integer reviewId, Integer userId);
+    UserCommentResponse updateMediaReview(Integer mediaItemId, UserCommentRequest request, Integer userId);
+    void deleteMediaReview(Integer mediaItemId, Integer userId);
     List<UserRatingResponse> getMediaRatings(Integer mediaItemId);
     UserRatingResponse createMediaRating(Integer mediaItemId, UserRatingRequest request, Integer userId);
-    UserRatingResponse updateMediaRating(Integer mediaItemId, Integer ratingId, UserRatingRequest request, Integer userId);
-    void deleteMediaRating(Integer ratingId, Integer userId);
+    UserRatingResponse updateMediaRating(Integer mediaItemId, UserRatingRequest request, Integer userId);
+    void deleteMediaRating(Integer mediaItemId, Integer userId);
 }

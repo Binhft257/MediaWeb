@@ -1,6 +1,5 @@
 package com.javaweb.controllers;
 
-import com.javaweb.model.request.UpdateProfileRequest;
 import com.javaweb.model.request.*;
 import com.javaweb.model.response.ApiResponse;
 import com.javaweb.model.response.LoginResponse;
