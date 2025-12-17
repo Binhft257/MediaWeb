@@ -108,7 +108,7 @@ public class MediaServiceImpl implements MediaService {
 
         // Create entity
         MediaItemEntity entity = new MediaItemEntity();
-        mapMediaItemToEntity(mediaCreateRequest, entity);   
+        mapMediaItemToEntity(mediaCreateRequest, entity);
         entity.setCreatedAt(new Date());
         entity.setUpdatedAt(new Date());
         entity.setUploadedBy(userId);
@@ -124,7 +124,7 @@ public class MediaServiceImpl implements MediaService {
     public void deleteMediaItem(Integer mediaItemId, Integer userId) {
         // Verify the user is an admin
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("You must be authenticated to delete a media item."));
-        
+
         if (userEntity.getRole().getName() != "Admin") {
             new UnauthorizedException("You must be an admin to delete a media item.");
         }
@@ -132,7 +132,7 @@ public class MediaServiceImpl implements MediaService {
         // Get the media item entity
         MediaItemEntity entity = mediaItemRepository.findById(mediaItemId)
                 .orElseThrow(() -> new RuntimeException("Media item not found."));
-        
+
         mediaItemRepository.delete(entity);
     }
 
@@ -166,9 +166,9 @@ public class MediaServiceImpl implements MediaService {
 
         // Map to response
         List<UserCommentResponse> reviewsResponses =
-            reviewsEntities.stream()
-                .map(this::mapToUserCommentResponse)
-                .toList();
+                reviewsEntities.stream()
+                        .map(this::mapToUserCommentResponse)
+                        .toList();
 
         return reviewsResponses;
     }
@@ -239,20 +239,20 @@ public class MediaServiceImpl implements MediaService {
         if (userId != entity.getUser().getId()) {
             throw new UnauthorizedException("You can't delete a review you didn't wrote.");
         }
-        
+
         // Delete the review
         userCommentRepository.delete(entity);
     }
-    
+
     @Override
     public List<UserRatingResponse> getMediaRatings(Integer mediaItemId) {
         List<UserRatingEntity> ratingsEntities = userRatingRepository.findByMediaItem_MediaItemId(mediaItemId);
 
         // Map to response
         List<UserRatingResponse> ratingsResponses =
-            ratingsEntities.stream()
-                .map(this::mapToUserRatingResponse)
-                .toList();
+                ratingsEntities.stream()
+                        .map(this::mapToUserRatingResponse)
+                        .toList();
 
         return ratingsResponses;
     }
@@ -303,7 +303,7 @@ public class MediaServiceImpl implements MediaService {
         userRatingRepository.save(entity);
 
         // Return the response
-        return mapToUserRatingResponse(entity);      
+        return mapToUserRatingResponse(entity);
     }
 
     @Override
@@ -321,7 +321,7 @@ public class MediaServiceImpl implements MediaService {
         if (userId != entity.getUser().getId()) {
             throw new UnauthorizedException("You can't delete a rating you don't own.");
         }
-        
+
         // Delete the review
         userRatingRepository.delete(entity);
     }
@@ -374,7 +374,7 @@ public class MediaServiceImpl implements MediaService {
 
         return dto;
     }
-    
+
     // Map a media item to entity
     private void mapMediaItemToEntity(MediaCreateRequest request, MediaItemEntity entity) {
 
@@ -395,7 +395,7 @@ public class MediaServiceImpl implements MediaService {
 
         if (request.getGenres() != null) {
             entity.setGenres(
-                genreRepository.findByGenreNameIn(request.getGenres())
+                    genreRepository.findByGenreNameIn(request.getGenres())
             );
         }
 
