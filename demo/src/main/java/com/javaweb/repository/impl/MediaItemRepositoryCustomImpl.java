@@ -6,11 +6,11 @@ import com.javaweb.repository.MediaItemRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 @Repository
 public class MediaItemRepositoryCustomImpl implements MediaItemRepositoryCustom {
 
@@ -18,32 +18,27 @@ public class MediaItemRepositoryCustomImpl implements MediaItemRepositoryCustom 
     private EntityManager entityManager;
 
     private void join(MediaSearchRequest request, StringBuilder sql) {
-
-        if (request.getTypeName() != null && !request.getTypeName().equals("")) {
+        if (request.getTypeName() != null && !request.getTypeName().isEmpty()) {
             sql.append(" LEFT JOIN media_type mt ON mt.media_type_id = mi.media_type_id ");
         }
 
-        if (request.getGenre() != null && !request.getGenre().equals("")) {
+        if (request.getGenre() != null && !request.getGenre().isEmpty()) {
             sql.append(" LEFT JOIN media_genre mg ON mg.media_item_id = mi.media_item_id ");
             sql.append(" LEFT JOIN genre g ON g.genre_id = mg.genre_id ");
         }
     }
 
     private void whereClause(MediaSearchRequest request, StringBuilder where) {
-
-        if (request.getTitle() != null && !request.getTitle().equals("")) {
+        if (request.getTitle() != null && !request.getTitle().isEmpty()) {
             where.append(" AND mi.title LIKE '%").append(request.getTitle()).append("%' ");
         }
-
-        if (request.getCountry() != null && !request.getCountry().equals("")) {
+        if (request.getCountry() != null && !request.getCountry().isEmpty()) {
             where.append(" AND mi.country LIKE '%").append(request.getCountry()).append("%' ");
         }
-
-        if (request.getTypeName() != null && !request.getTypeName().equals("")) {
+        if (request.getTypeName() != null && !request.getTypeName().isEmpty()) {
             where.append(" AND mt.type_name LIKE '%").append(request.getTypeName()).append("%' ");
         }
-
-        if (request.getGenre() != null && !request.getGenre().equals("")) {
+        if (request.getGenre() != null && !request.getGenre().isEmpty()) {
             where.append(" AND g.genre_name LIKE '%").append(request.getGenre()).append("%' ");
         }
     }
@@ -51,23 +46,22 @@ public class MediaItemRepositoryCustomImpl implements MediaItemRepositoryCustom 
     @Override
     public List<MediaItemEntity> getMediasWithCondition(Pageable pageable, MediaSearchRequest request) {
 
-        StringBuilder sql = new StringBuilder(
-                "SELECT DISTINCT mi.* FROM media_item mi "
-        );
-
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT mi.* FROM media_item mi ");
         join(request, sql);
 
         StringBuilder where = new StringBuilder(" WHERE 1=1 ");
         whereClause(request, where);
-
         sql.append(where);
 
-        if(pageable != null) {
+        sql.append(" ORDER BY mi.media_item_id DESC ");
+
+        if (pageable != null) {
             sql.append(" LIMIT ")
                     .append(pageable.getPageSize())
                     .append(" OFFSET ")
                     .append(pageable.getOffset());
         }
+
         Query query = entityManager.createNativeQuery(sql.toString(), MediaItemEntity.class);
         return query.getResultList();
     }

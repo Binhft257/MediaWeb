@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -141,13 +142,16 @@ public class MediaServiceImpl implements MediaService {
 
     // ===================== REVIEWS =====================
 
+
     @Override
     public List<UserCommentResponse> getMediaReviews(Integer mediaItemId) {
-        return userCommentRepository.findByMediaItem_MediaItemId(mediaItemId)
+        return userCommentRepository
+                .findByMediaItem_MediaItemId(mediaItemId, Sort.by(Sort.Direction.DESC, "commentId"))
                 .stream()
                 .map(this::mapToUserCommentResponse)
                 .toList();
     }
+
 
     @Override
     public UserCommentResponse createMediaReview(Integer mediaItemId, UserCommentRequest request, Integer userId) {

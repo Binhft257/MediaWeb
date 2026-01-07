@@ -1,6 +1,8 @@
 package com.javaweb.entity;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -69,6 +71,42 @@ public class MediaItemEntity {
 
     @OneToOne(mappedBy = "mediaItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private TVSeriesEntity tvSeries;
+
+    @OneToMany(mappedBy = "mediaItem", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<UserCommentEntity> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "mediaItem", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<UserRatingEntity> ratings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "mediaItem", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<UserMediaLogEntity> mediaLogs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "mediaItem", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<UserHistoryEntity> histories = new ArrayList<>();
+
+    public List<UserCommentEntity> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<UserCommentEntity> comments) {
+        this.comments = comments;
+    }
+
+    public List<UserRatingEntity> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<UserRatingEntity> ratings) {
+        this.ratings = ratings;
+    }
+
+    public List<UserMediaLogEntity> getMediaLogs() {
+        return mediaLogs;
+    }
+
+    public void setMediaLogs(List<UserMediaLogEntity> mediaLogs) {
+        this.mediaLogs = mediaLogs;
+    }
 
     public MoviesEntity getMovie() {
         return movie;
