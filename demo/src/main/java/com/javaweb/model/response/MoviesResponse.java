@@ -2,7 +2,7 @@ package com.javaweb.model.response;
 
 public class MoviesResponse extends MediaSearchResponse{
     private String producers;
-    private String directors;
+    private String director;
     private String cast;
     private int runTimeMinutes;
 
@@ -14,12 +14,12 @@ public class MoviesResponse extends MediaSearchResponse{
         this.producers = producers;
     }
 
-    public String getDirectors() {
-        return directors;
+    public String getDirector() {
+        return director;
     }
 
-    public void setDirectors(String directors) {
-        this.directors = directors;
+    public void setDirector(String director) {
+        this.director = director;
     }
 
     public String getCast() {

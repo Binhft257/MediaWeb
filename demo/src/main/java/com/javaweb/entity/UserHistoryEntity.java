@@ -4,13 +4,14 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "user_comment")
-public class UserCommentEntity {
+@Table(name = "UserHistory",
+       uniqueConstraints = @UniqueConstraint(name = "uk_user_media", columnNames = {"user_id", "media_item_id"}))
+public class UserHistoryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
-    private Integer commentId;
+    @Column(name = "history_id")
+    private Integer historyId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -20,19 +21,11 @@ public class UserCommentEntity {
     @JoinColumn(name = "media_item_id", nullable = false)
     private MediaItemEntity mediaItem;
 
-    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
-    private String content;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private Date createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private Date updatedAt;
-
-    public Integer getCommentId() { return commentId; }
-    public void setCommentId(Integer commentId) { this.commentId = commentId; }
+    public Integer getHistoryId() { return historyId; }
+    public void setHistoryId(Integer historyId) { this.historyId = historyId; }
 
     public UserEntity getUser() { return user; }
     public void setUser(UserEntity user) { this.user = user; }
@@ -40,12 +33,6 @@ public class UserCommentEntity {
     public MediaItemEntity getMediaItem() { return mediaItem; }
     public void setMediaItem(MediaItemEntity mediaItem) { this.mediaItem = mediaItem; }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
-
-    public Date getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 }

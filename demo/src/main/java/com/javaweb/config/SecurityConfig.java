@@ -61,7 +61,8 @@ public class SecurityConfig {
                         "/api/auth/password-reset/request",
                         "/api/auth/password-reset/confirm",
                         "/api/medias/**"
-                ).permitAll()
+                ).permitAll().requestMatchers("/uploads/**").permitAll()
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
         );
 

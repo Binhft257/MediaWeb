@@ -1,13 +1,9 @@
 package com.javaweb.model.request;
 
-public class TrackMediaRequest {
-    private Integer mediaItemId;
+public class UpdateTrackingRequest {
     private String status;   // PLAN_TO_WATCH | WATCHING | COMPLETED
     private String comment;  // optional
     private Integer rating;  // optional
-
-    public Integer getMediaItemId() { return mediaItemId; }
-    public void setMediaItemId(Integer mediaItemId) { this.mediaItemId = mediaItemId; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

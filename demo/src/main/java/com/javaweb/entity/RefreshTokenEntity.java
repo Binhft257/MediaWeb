@@ -12,18 +12,19 @@ public class RefreshTokenEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false, unique=true, length=500)
+    @Column(nullable = false, unique = true, length = 500)
     private String token;
 
-    @Column(nullable=false)
+    @Column(name = "expiry_date", nullable = false)
     private Date expiryDate;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private boolean revoked = false;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable=false)
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
+
 
     public Long getId() { return id; }
 

@@ -2,9 +2,9 @@ package com.javaweb.model.request;
 
 public class MoviesRequest extends MediaCreateRequest{
     private String producers;
-    private String directors;
+    private String director;
     private String cast;
-    private int runTimeMinutes;
+    private Integer runTimeMinutes;
     
     public String getProducers() {
         return producers;
@@ -14,12 +14,12 @@ public class MoviesRequest extends MediaCreateRequest{
         this.producers = producers;
     }
 
-    public String getDirectors() {
-        return directors;
+    public String getDirector() {
+        return director;
     }
 
-    public void setDirectors(String directors) {
-        this.directors = directors;
+    public void setDirector(String director) {
+        this.director = director;
     }
 
     public String getCast() {
@@ -30,11 +30,11 @@ public class MoviesRequest extends MediaCreateRequest{
         this.cast = cast;
     }
 
-    public int getRunTimeMinutes() {
+    public Integer getRunTimeMinutes() {
         return runTimeMinutes;
     }
 
-    public void setRunTimeMinutes(int runTimeMinutes) {
+    public void setRunTimeMinutes(Integer runTimeMinutes) {
         this.runTimeMinutes = runTimeMinutes;
     }
 }

@@ -14,7 +14,6 @@ public class OtpTokenUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    // Tạo token chứa OTP + email
     public String generateOtpToken(String email, int otp) {
         return Jwts.builder()
                 .claim("email", email)

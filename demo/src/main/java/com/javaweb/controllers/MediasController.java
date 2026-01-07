@@ -1,5 +1,6 @@
 package com.javaweb.controllers;
 
+import com.javaweb.exceptions.UnauthorizedException;
 import com.javaweb.model.request.MediaCreateRequest;
 import com.javaweb.model.request.MediaSearchRequest;
 import com.javaweb.model.request.UserCommentRequest;
@@ -12,8 +13,11 @@ import com.javaweb.service.MediaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,9 +34,13 @@ public class MediasController {
     public Page<MediaSearchResponse> searchMedias(
             MediaSearchRequest request,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "12") int limit
     ) {
-        PageRequest pageable = PageRequest.of(page - 1, limit);
+        PageRequest pageable = PageRequest.of(
+                page - 1,
+                limit,
+                Sort.by(Sort.Direction.DESC, "createdAt") // hoặc "mediaItemId"/"id"
+        );
         return mediaService.getMedias(pageable, request);
     }
 
@@ -54,6 +62,14 @@ public class MediasController {
     // Delete a media item
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMediaItem(@PathVariable Integer id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null ||
+                !auth.isAuthenticated() ||
+                auth.getPrincipal() instanceof String) {
+
+            throw new UnauthorizedException("You must be authenticated.");
+        }
        Integer userId = SecurityUtils.getPrincipal().getId();
         mediaService.deleteMediaItem(id, userId);
         return ResponseEntity.noContent().build();
@@ -74,29 +90,40 @@ public class MediasController {
         return ResponseEntity.ok(response);
     }
 
-    // Create the personal review on a media item
+    // Create review (mỗi lần POST = tạo 1 review mới => user review nhiều lần OK)
     @PostMapping("/{id}/reviews")
-    public ResponseEntity<UserCommentResponse> createReview(@PathVariable Integer id, @RequestBody UserCommentRequest request) {
-       Integer userId = SecurityUtils.getPrincipal().getId();
-        UserCommentResponse response = mediaService.createMediaReview(id, request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response); 
-    }
-
-    // Edit the personal review on a media item
-    @PutMapping("/{mediaItemId}/reviews")
-    public ResponseEntity<UserCommentResponse> updateReview(@PathVariable Integer mediaItemId, @RequestBody UserCommentRequest request) {
+    public ResponseEntity<UserCommentResponse> createReview(
+            @PathVariable Integer id,
+            @RequestBody UserCommentRequest request
+    ) {
         Integer userId = SecurityUtils.getPrincipal().getId();
-        UserCommentResponse reponse = mediaService.updateMediaReview(mediaItemId, request, userId);
-        return ResponseEntity.ok(reponse);
+        UserCommentResponse response = mediaService.createMediaReview(id, request, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Delete the personal review on a media item
-    @DeleteMapping("/{mediaItemId}/reviews")
-    public ResponseEntity<Void> deleteReview(@PathVariable Integer mediaItemId) {
-       Integer userId = SecurityUtils.getPrincipal().getId();
-        mediaService.deleteMediaReview(mediaItemId, userId);
+    // Update review
+    @PutMapping("/{mediaItemId}/reviews/{reviewId}")
+    public ResponseEntity<UserCommentResponse> updateReview(
+            @PathVariable Integer mediaItemId,
+            @PathVariable Integer reviewId,
+            @RequestBody UserCommentRequest request
+    ) {
+        Integer userId = SecurityUtils.getPrincipal().getId();
+        UserCommentResponse response = mediaService.updateMediaReview(mediaItemId, reviewId, request, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    // Delete review
+    @DeleteMapping("/{mediaItemId}/reviews/{reviewId}")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable Integer mediaItemId,
+            @PathVariable Integer reviewId
+    ) {
+        Integer userId = SecurityUtils.getPrincipal().getId();
+        mediaService.deleteMediaReview(mediaItemId, reviewId, userId);
         return ResponseEntity.noContent().build();
     }
+
 
     // List all ratings on a media item
     @GetMapping("/{id}/ratings")

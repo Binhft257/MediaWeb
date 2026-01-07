@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class UserResponse {
     private Integer id;
-    private String name;      // Tên user
+    private String name;
     private String email;
     private String role;
     private String status;

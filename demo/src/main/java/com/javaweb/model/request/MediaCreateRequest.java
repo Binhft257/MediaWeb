@@ -46,9 +46,6 @@ public class MediaCreateRequest {
     }
 
     public void setTitle(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Media item must have a title.");
-        }
         this.title = title;
     }
 

@@ -17,7 +17,6 @@ public class MediaItemRepositoryCustomImpl implements MediaItemRepositoryCustom 
     @PersistenceContext
     private EntityManager entityManager;
 
-    // ================= JOIN ================= //
     private void join(MediaSearchRequest request, StringBuilder sql) {
 
         if (request.getTypeName() != null && !request.getTypeName().equals("")) {
@@ -30,7 +29,6 @@ public class MediaItemRepositoryCustomImpl implements MediaItemRepositoryCustom 
         }
     }
 
-    // =============== WHERE CLAUSE =============== //
     private void whereClause(MediaSearchRequest request, StringBuilder where) {
 
         if (request.getTitle() != null && !request.getTitle().equals("")) {
@@ -50,7 +48,6 @@ public class MediaItemRepositoryCustomImpl implements MediaItemRepositoryCustom 
         }
     }
 
-    // ============== FIND ALL WITH PAGINATION ============== //
     @Override
     public List<MediaItemEntity> getMediasWithCondition(Pageable pageable, MediaSearchRequest request) {
 
@@ -65,7 +62,6 @@ public class MediaItemRepositoryCustomImpl implements MediaItemRepositoryCustom 
 
         sql.append(where);
 
-        // Pagination
         if(pageable != null) {
             sql.append(" LIMIT ")
                     .append(pageable.getPageSize())
